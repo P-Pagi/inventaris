@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model InventoryItem {
+  id          String   @id @default(cuid())
+  jenisBarang String   // Jenis Barang (Terminal, Laptop, dll)
+  merkTipe    String   @default("") // Merk/Tipe
+  nomorAsset  String   @unique // Nomor Asset
+  qty         Int      @default(1)
+  status      String   @default("tersedia") // tersedia | dipinjam
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  loans       Loan[]
+}
+
+model Loan {
+  id               String         @id @default(cuid())
+  itemId           String
+  item             InventoryItem  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  yangMeminjamkan  String         // Nama yang meminjamkan
+  namaPeminjam     String         // Nama peminjam
+  department       String         // Departemen
+  tglPinjam        DateTime       // Tanggal pinjam
+  targetTglKembali DateTime       // Target tanggal kembali
+  realTglKembali   DateTime?      // Real tanggal kembali (null = belum dikembalikan)
+  namaPengembalian String?        // Nama yang mengembalikan
+  status           String         @default("dipinjam") // dipinjam | dikembalikan | overdue
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
